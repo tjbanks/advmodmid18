@@ -137,12 +137,12 @@ def main():
     #SELECT ALGORITHM
     score = 0
     
-    #RANDOM FOREST
+    #### RANDOM FOREST
     score = random_forest(train_features, train_labels, test_features, test_labels)
     
-    #GRADIENT BOOSTED TREES
-    score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels)
+    #### GRADIENT BOOSTED TREES
+    #score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels)
     
-    print("Accuracy Score: " + score)
+    print("Accuracy Score: " + str(score))
     
 main()
