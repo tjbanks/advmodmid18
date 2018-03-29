@@ -27,6 +27,12 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
+
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn import cross_validation, metrics
+import matplotlib.pylab as plt
+from matplotlib.pylab import rcParams
+
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.models import Sequential
 from keras.layers import Dense
@@ -85,9 +91,20 @@ def random_forest(train_features, train_labels, test_features, test_labels):
     #4 Score: 0.518518518519
     #5 Score: 0.518518518519
     
-def gradient_boosted_trees(train_features, train_labels, test_features, test_labels):
+def gradient_boosted_trees(train_features, train_labels, test_features, test_labels,feature_list):
     
-    return 0
+    rcParams['figure.figsize'] = 12, 4
+    gbm0 = GradientBoostingClassifier(random_state=42)
+    gbm0.fit(train_features, train_labels)
+    predicted = gbm0.predict(test_features)
+    
+    acc = accuracy_score(test_labels, predicted)
+    
+    feat_imp = pd.Series(gbm0.feature_importances_, feature_list).sort_values(ascending=False)
+    feat_imp.plot(kind='bar', title='Feature Importances')
+    plt.ylabel('Feature Importance Score')
+            
+    return acc
 
 def dense_neural_network(train_features, train_labels, test_features, test_labels,num_labels):
     np.random.seed(7)
@@ -141,7 +158,7 @@ def dense_neural_network(train_features, train_labels, test_features, test_label
     
 def main():
     input_file = "Dataset_MGH_master_9_01_16.xlsx"
-    num_solutions = 5
+    num_solutions = 3
     
     #Step 1: Obtain the data
     try:
@@ -200,7 +217,7 @@ def main():
     #score = random_forest(train_features, train_labels, test_features, test_labels)
     
     #### GRADIENT BOOSTED TREES
-    score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels)
+    score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels, feature_list)
     
     #### DENSE NEURAL NETWORKS
     #score = dense_neural_network(train_features, train_labels, test_features, test_labels,num_solutions)
