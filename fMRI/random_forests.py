@@ -14,6 +14,8 @@ Created on Wed Mar 28 14:12:12 2018
     Helpful resources:
     https://towardsdatascience.com/random-forest-in-python-24d0893d51c0
     https://www.analyticsvidhya.com/blog/2016/02/complete-guide-parameter-tuning-gradient-boosting-gbm-python/
+    Cross Validation: https://www.youtube.com/watch?v=TIgfjmp-4BA
+    Keras Classifier: https://machinelearningmastery.com/multi-class-classification-tutorial-keras-deep-learning-library/
 """
 
 import pandas as pd
@@ -22,6 +24,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from keras.wrappers.scikit_learn import KerasClassifier
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.utils import np_utils
 
 def get_data(filename, solution_num=3):
     if(solution_num not in range(3,6)):
@@ -80,9 +89,59 @@ def gradient_boosted_trees(train_features, train_labels, test_features, test_lab
     
     return 0
 
+def dense_neural_network(train_features, train_labels, test_features, test_labels,num_labels):
+    np.random.seed(7)
+    rand_state = 42 
+    
+    #Put the thing back together
+    train_features = np.append(train_features, test_features,axis=0)
+    train_labels = np.append(train_labels, test_labels, axis=0)
+    
+    #Encode output
+    encoder = LabelEncoder()
+    encoder.fit(train_labels)
+    
+    encoded_train_labels = encoder.transform(train_labels)
+    # convert integers to dummy variables (i.e. one hot encoded)
+    dummy_train_labels = np_utils.to_categorical(encoded_train_labels)
+
+    #encoded_test_labels = encoder.transform(test_labels)
+    # convert integers to dummy variables (i.e. one hot encoded)
+    #dummy_test_labels = np_utils.to_categorical(encoded_test_labels)
+    
+    def build_mod():
+        # create model
+        model = Sequential()
+        model.add(Dense(30, input_dim=56, activation='relu'))
+        model.add(Dense(15, activation='relu'))
+        model.add(Dense(num_labels+1, activation='sigmoid'))
+    	
+        # Compile model
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+        return model
+    
+    # run model
+    #model.fit(train_features, dummy_train_labels, epochs=150, batch_size=10)
+    
+    estimator = KerasClassifier(build_fn=build_mod, epochs=40, batch_size=5, verbose=1)
+    kfold = KFold(n_splits=6, shuffle=True, random_state=rand_state)
+    results = cross_val_score(estimator, train_features, dummy_train_labels, cv=kfold)
+
+    return str.format("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+    
+    #3 Fold Validation
+    #3 Score: Accuracy Score: Baseline: 80.00% (4.50%)
+    #4 Score: Accuracy Score: Baseline: 78.01% (2.12%)
+    #5 Score: Accuracy Score: Baseline: 83.20% (1.18%)
+    
+    #6 Fold Validation
+    #3 Score: Accuracy Score: Baseline: 77.26% (4.21%)
+    #4 Score: Accuracy Score: Baseline: 77.97% (3.43%)
+    #5 Score: Accuracy Score: Baseline: 81.07% (2.01%)
+    
 def main():
     input_file = "Dataset_MGH_master_9_01_16.xlsx"
-    num_solutions = 3
+    num_solutions = 5
     
     #Step 1: Obtain the data
     try:
@@ -138,10 +197,13 @@ def main():
     score = 0
     
     #### RANDOM FOREST
-    score = random_forest(train_features, train_labels, test_features, test_labels)
+    #score = random_forest(train_features, train_labels, test_features, test_labels)
     
     #### GRADIENT BOOSTED TREES
-    #score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels)
+    score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels)
+    
+    #### DENSE NEURAL NETWORKS
+    #score = dense_neural_network(train_features, train_labels, test_features, test_labels,num_solutions)
     
     print("Accuracy Score: " + str(score))
     
