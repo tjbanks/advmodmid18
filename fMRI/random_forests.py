@@ -106,6 +106,10 @@ def gradient_boosted_trees(train_features, train_labels, test_features, test_lab
             
     return acc
 
+    #3 Score: 0.592592592593
+    #4 Score: 0.296296296296
+    #5 Score: 0.518518518519
+
 def dense_neural_network(train_features, train_labels, test_features, test_labels,num_labels):
     np.random.seed(7)
     rand_state = 42 
@@ -158,7 +162,8 @@ def dense_neural_network(train_features, train_labels, test_features, test_label
     
 def main():
     input_file = "Dataset_MGH_master_9_01_16.xlsx"
-    num_solutions = 3
+    num_solutions = 5
+    
     
     #Step 1: Obtain the data
     try:
