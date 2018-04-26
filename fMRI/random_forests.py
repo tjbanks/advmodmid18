@@ -126,9 +126,9 @@ def dense_neural_network(train_features, train_labels, test_features, test_label
     # convert integers to dummy variables (i.e. one hot encoded)
     dummy_train_labels = np_utils.to_categorical(encoded_train_labels)
 
-    #encoded_test_labels = encoder.transform(test_labels)
+    encoded_test_labels = encoder.transform(test_labels)
     # convert integers to dummy variables (i.e. one hot encoded)
-    #dummy_test_labels = np_utils.to_categorical(encoded_test_labels)
+    dummy_test_labels = np_utils.to_categorical(encoded_test_labels)
     
     def build_mod():
         # create model
@@ -146,10 +146,16 @@ def dense_neural_network(train_features, train_labels, test_features, test_label
     
     estimator = KerasClassifier(build_fn=build_mod, epochs=40, batch_size=5, verbose=1)
     kfold = KFold(n_splits=6, shuffle=True, random_state=rand_state)
-    results = cross_val_score(estimator, train_features, dummy_train_labels, cv=kfold)
+    results = cross_val_score(estimator, test_features, dummy_test_labels, cv=kfold)
 
     return str.format("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
     
+	
+	#After changes to test features and labels: 
+	#3 Accuracy Score: Baseline: 72.50% (6.65%)
+	#5 Accuracy Score: Baseline: 68.89% (8.24%)
+
+	
     #3 Fold Validation
     #3 Score: Accuracy Score: Baseline: 80.00% (4.50%)
     #4 Score: Accuracy Score: Baseline: 78.01% (2.12%)
@@ -162,7 +168,7 @@ def dense_neural_network(train_features, train_labels, test_features, test_label
     
 def main():
     input_file = "Dataset_MGH_master_9_01_16.xlsx"
-    num_solutions = 5
+    num_solutions = 3
     
     
     #Step 1: Obtain the data
@@ -206,7 +212,7 @@ def main():
     
     #Step 5: Create Training and Test Sets
     test_size = .2
-    rand_state = 42 #For reproducability
+    rand_state = 43 #For reproducability
     train_features, test_features, train_labels, test_labels = \
         train_test_split(features, labels, test_size = test_size, random_state = rand_state)
     
@@ -222,10 +228,10 @@ def main():
     #score = random_forest(train_features, train_labels, test_features, test_labels)
     
     #### GRADIENT BOOSTED TREES
-    score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels, feature_list)
+    #score = gradient_boosted_trees(train_features, train_labels, test_features, test_labels, feature_list)
     
     #### DENSE NEURAL NETWORKS
-    #score = dense_neural_network(train_features, train_labels, test_features, test_labels,num_solutions)
+    score = dense_neural_network(train_features, train_labels, test_features, test_labels,num_solutions)
     
     print("Accuracy Score: " + str(score))
     
